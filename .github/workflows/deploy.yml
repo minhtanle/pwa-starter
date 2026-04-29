@@ -34,3 +34,34 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+      - name: Notify Telegram
+        if: ${{ always() && secrets.TELEGRAM_BOT_TOKEN != '' && secrets.TELEGRAM_CHAT_ID != '' }}
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          JOB_STATUS: ${{ job.status }}
+          REPO: ${{ github.repository }}
+          REF_NAME: ${{ github.ref_name }}
+          ACTOR: ${{ github.actor }}
+          COMMIT_SHA: ${{ github.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          STATUS_ICON="[SUCCESS]"
+          if [ "$JOB_STATUS" != "success" ]; then
+            STATUS_ICON="[FAILED]"
+          fi
+
+          SHORT_SHA="${COMMIT_SHA::7}"
+          MESSAGE="${STATUS_ICON} GitHub Pages deploy <b>${JOB_STATUS}</b>
+Repo: <b>${REPO}</b>
+Branch: <b>${REF_NAME}</b>
+Actor: <b>${ACTOR}</b>
+Commit: <code>${SHORT_SHA}</code>
+Run: ${RUN_URL}"
+
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+            --data-urlencode "text=${MESSAGE}" \
+            --data-urlencode "parse_mode=HTML" \
+            > /dev/null
