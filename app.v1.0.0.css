@@ -1,7 +1,5 @@
 /* app.v1.0.0.css */
 
-@import "https://cdn.jsdelivr.net/npm/tailwindcss@4/dist/tailwind.min.css";
-
 :root {
   /* Safe area insets — fallback 0px cho thiết bị không hỗ trợ */
   --sat: env(safe-area-inset-top, 0px);
@@ -10,6 +8,8 @@
   --sal: env(safe-area-inset-left, 0px);
 
   --header-height: 52px;
+  --info-height: clamp(300px, 40dvh, 380px);
+  --overlap: 0px;
 }
 
 /* Toàn bộ app chiếm đúng viewport, không scroll ngoài */
