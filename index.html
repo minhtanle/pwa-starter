@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+
+    <!-- viewport: viewport-fit=cover là bắt buộc để safe-area env() hoạt động -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+    <title>App</title>
+
+    <!-- PWA meta -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="PWA App" />
+    <meta name="theme-color" content="#ffffff" />
+
+    <link rel="manifest" href="./manifest.json" />
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="./app.v1.0.0.css" />
+
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+</head>
+
+<body class="bg-white text-gray-900">
+
+    <div id="app">
+
+        <!-- Header: back | title | settings -->
+        <header id="app-header" class="bg-white border-b border-gray-200">
+
+            <!-- Back -->
+            <button id="btn-back" class="header-btn" aria-label="Quay lại">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 18l-6-6 6-6" />
+                </svg>
+            </button>
+
+            <!-- Title -->
+            <span class="header-title">Tiêu đề</span>
+
+            <!-- Settings -->
+            <button id="btn-settings" class="header-btn header-right" aria-label="Cài đặt">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="3" />
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06
+                   a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09
+                   A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83
+                   l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09
+                   A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83
+                   l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09
+                   a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83
+                   l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09
+                   a1.65 1.65 0 0 0-1.51 1z" />
+                </svg>
+            </button>
+
+        </header>
+
+        <!-- Content — đặt toàn bộ nội dung trang vào đây -->
+        <main id="app-content">
+
+            <!-- Demo content -->
+
+            <div id="camera-section" class="bg-slate-900 overflow-hidden">
+                123
+                <!-- Background đơn giản thay vì ảnh -->
+                <div class="absolute inset-0 flex items-center justify-center pb-20">
+                    <div class="relative w-60 h-60">
+                        <div class="absolute -top-1 -left-1 w-12 h-12 border-t-4 border-l-4 border-emerald-500 rounded-tl-3xl"></div>
+                        <div class="absolute -top-1 -right-1 w-12 h-12 border-t-4 border-r-4 border-emerald-500 rounded-tr-3xl"></div>
+                        <div class="absolute -bottom-1 -left-1 w-12 h-12 border-b-4 border-l-4 border-emerald-500 rounded-bl-3xl"></div>
+                        <div class="absolute -bottom-1 -right-1 w-12 h-12 border-b-4 border-r-4 border-emerald-500 rounded-br-3xl"></div>
+
+                        <div class="scan-anim absolute top-2 left-4 right-4 h-1 bg-emerald-400 shadow-[0_0_20px_#10b981]"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="info-section">
+                <div id="update-toast-container" class="h-4 w-full px-6 flex items-center justify-center mt-2">
+                    <!-- <div id="loading-bar" class="h-1.5 w-32 bg-gray-100 rounded-full overflow-hidden">
+                        <div class="h-full bg-emerald-500 animate-[shrink_0.5s_linear_infinite]" style="width: 100%;"></div>
+                    </div> -->
+                    <div id="update-toast" class="hidden w-full max-w-xs bg-gray-900 text-white text-center text-xs font-bold py-2 px-4 rounded-full shadow-lg cursor-pointer active:scale-95 transition-transform">
+                        🚀 Phiên bản mới! Chạm để cập nhật
+                    </div>
+                </div>
+
+                <div class="p-3 ios-scroll-lock">
+                    <div class="flex items-center gap-5">
+                        <div class="w-16 h-16 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex-shrink-0 flex items-center justify-center text-white font-extrabold text-2xl shadow-lg shadow-emerald-100">
+                            Đ
+                        </div>
+                        <div class="flex-grow">
+                            <h2 class="text-2xl font-extrabold text-gray-900 leading-tight">QUÝ ĐỨC</h2>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-xs font-bold text-gray-400 uppercase tracking-tighter">Mã: 11001</span>
+                                <span class="w-1 h-1 bg-gray-300 rounded-full"></span>
+                                <span class="text-xs font-bold text-emerald-600 uppercase">Thành công</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 space-y-2">
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-gray-400 font-medium tracking-tight">Phụ huynh:</span>
+                            <span class="text-gray-800 font-bold">Nguyễn Đăng Thu Hà</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-gray-400 font-medium tracking-tight">Thời gian ra:</span>
+                            <span class="text-emerald-600 font-black text-lg">14:21:38</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-bar">
+                    <div class="flex gap-3">
+                        <button class="flex-1 py-4 bg-gray-100 text-gray-500 font-bold rounded-2xl text-xs tracking-widest active:scale-95 transition-transform">
+                            STOP
+                        </button>
+                        <button class="flex-[2.5] py-4 bg-[#A11B4B] text-white font-black rounded-2xl text-xs tracking-[0.15em] uppercase btn-shadow active:scale-95 transition-all">
+                            QUÉT TIẾP
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+    </div>
+
+    <!-- JS -->
+    <script src="./app.v1.0.0.js"></script>
+</body>
+
+</html>

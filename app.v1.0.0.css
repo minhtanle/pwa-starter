@@ -1,0 +1,159 @@
+/* app.v1.0.0.css */
+
+@import "https://cdn.jsdelivr.net/npm/tailwindcss@4/dist/tailwind.min.css";
+
+:root {
+  /* Safe area insets — fallback 0px cho thiết bị không hỗ trợ */
+  --sat: env(safe-area-inset-top, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+
+  --header-height: 52px;
+}
+
+/* Toàn bộ app chiếm đúng viewport, không scroll ngoài */
+html, body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Wrapper bọc toàn bộ — tính đúng safe area */
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh; /* dynamic viewport height — quan trọng trên mobile */
+  padding-top: var(--sat);
+  padding-right: var(--sar);
+  padding-bottom: var(--sab);
+  padding-left: var(--sal);
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Header: 3 vùng — back | title | settings */
+#app-header {
+  display: grid;
+  grid-template-columns: var(--header-height) 1fr var(--header-height);
+  align-items: center;
+  height: var(--header-height);
+  flex-shrink: 0;
+  padding-inline: 4px;
+}
+
+#app-header .header-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.15s;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+#app-header .header-btn:active {
+  background: rgba(0,0,0,0.08);
+}
+
+#app-header .header-title {
+  text-align: center;
+  font-weight: 600;
+  font-size: 17px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#app-header .header-right {
+  justify-self: end;
+}
+
+/* Content: phần còn lại, scroll bên trong */
+#app-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
+
+
+/* Camera section - Chiếm phần còn lại của màn hình */
+#camera-section {
+    position: relative;
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    z-index: 1;
+    /* Đảm bảo không bị info-section che */
+    padding-bottom: env(safe-area-inset-bottom);
+    height: calc(100dvh - var(--info-height));
+}
+
+/* Info section - Khung dưới cùng */
+#info-section {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: var(--info-height);
+    max-height: none;
+    background: white;
+    border-top-left-radius: 2.5rem;
+    border-top-right-radius: 2.5rem;
+    box-shadow: 0 -15px 30px rgba(0,0,0,0.4);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    margin-top: calc(-1 * var(--overlap));
+    overscroll-behavior: contain;
+}
+
+.ios-scroll-lock {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+}
+
+/* Action bar - Dính sát đáy dưới cùng */
+.action-bar {
+    padding: 0.5rem;
+    padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem);
+    background: white;
+    /* Đẩy xuống dưới cùng của info-section */
+    margin-top: auto;
+}
+
+.btn-shadow {
+    box-shadow: 0 10px 20px -5px rgba(161, 27, 75, 0.4);
+}
+
+@keyframes scan {
+    0%, 100% { transform: translateY(0); opacity: 0.2; }
+    50% { transform: translateY(220px); opacity: 1; }
+}
+.scan-anim {
+    animation: scan 2.5s ease-in-out infinite;
+}
+
+@keyframes shrink {
+    from { width: 100%; }
+    to { width: 0%; }
+}
+
+@media (max-height: 700px) {
+    :root {
+        --info-height: clamp(250px, 45dvh, 320px);
+    }
+
+    #info-section {
+        border-top-left-radius: 2rem;
+        border-top-right-radius: 2rem;
+    }
+}
