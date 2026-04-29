@@ -45,7 +45,6 @@ jobs:
           REF_NAME: ${{ github.ref_name }}
           ACTOR: ${{ github.actor }}
           COMMIT_SHA: ${{ github.sha }}
-          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           STATUS_ICON="[SUCCESS]"
           if [ "$JOB_STATUS" != "success" ]; then
@@ -58,7 +57,7 @@ jobs:
           MESSAGE+=$'\nBranch: <b>'"${REF_NAME}"'</b>'
           MESSAGE+=$'\nActor: <b>'"${ACTOR}"'</b>'
           MESSAGE+=$'\nCommit: <code>'"${SHORT_SHA}"'</code>'
-          MESSAGE+=$'\nRun: '"${RUN_URL}"
+          MESSAGE+=$'\nRun: '"${github.run_id}"
 
           if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
             echo "[Telegram] Skipped: secrets not set"
