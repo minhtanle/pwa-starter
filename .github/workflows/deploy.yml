@@ -60,8 +60,13 @@ jobs:
           MESSAGE+=$'\nCommit: <code>'"${SHORT_SHA}"'</code>'
           MESSAGE+=$'\nRun: '"${RUN_URL}"
 
-          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
-            --data-urlencode "text=${MESSAGE}" \
-            --data-urlencode "parse_mode=HTML" \
-            > /dev/null
+          if [ -z "$TELEGRAM_BOT_TOKEN" ] || [ -z "$TELEGRAM_CHAT_ID" ]; then
+            echo "[Telegram] Skipped: secrets not set"
+            exit 0
+          fi
+
+          RESPONSE=$(curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            -d "chat_id=${TELEGRAM_CHAT_ID}" \
+            -d "parse_mode=HTML" \
+            --data-urlencode "text=${MESSAGE}")
+          echo "[Telegram] Response: ${RESPONSE}"
