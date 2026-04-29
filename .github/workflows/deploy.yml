@@ -36,7 +36,7 @@ jobs:
         uses: actions/deploy-pages@v4
 
       - name: Notify Telegram
-        if: ${{ always() && secrets.TELEGRAM_BOT_TOKEN != '' && secrets.TELEGRAM_CHAT_ID != '' }}
+        if: always()
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
@@ -53,12 +53,12 @@ jobs:
           fi
 
           SHORT_SHA="${COMMIT_SHA::7}"
-          MESSAGE="${STATUS_ICON} GitHub Pages deploy <b>${JOB_STATUS}</b>
-Repo: <b>${REPO}</b>
-Branch: <b>${REF_NAME}</b>
-Actor: <b>${ACTOR}</b>
-Commit: <code>${SHORT_SHA}</code>
-Run: ${RUN_URL}"
+          MESSAGE="${STATUS_ICON} GitHub Pages deploy <b>${JOB_STATUS}</b>"
+          MESSAGE+=$'\nRepo: <b>'"${REPO}"'</b>'
+          MESSAGE+=$'\nBranch: <b>'"${REF_NAME}"'</b>'
+          MESSAGE+=$'\nActor: <b>'"${ACTOR}"'</b>'
+          MESSAGE+=$'\nCommit: <code>'"${SHORT_SHA}"'</code>'
+          MESSAGE+=$'\nRun: '"${RUN_URL}"
 
           curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
             --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
