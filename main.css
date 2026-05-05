@@ -126,12 +126,34 @@ html, body {
     padding: 0.5rem;
     padding-bottom: calc(env(safe-area-inset-bottom) + 0.5rem);
     background: white;
-    /* Đẩy xuống dưới cùng của info-section */
     margin-top: auto;
 }
 
 .btn-shadow {
     box-shadow: 0 10px 20px -5px rgba(161, 27, 75, 0.4);
+}
+
+/* Home screen grid */
+#home-screen {
+    padding-top: 2rem;
+}
+
+/* Settings page */
+#settings-page {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 2rem);
+}
+
+.setting-item {
+    transition: transform 0.15s;
+}
+.setting-item:active {
+    transform: scale(0.98);
+}
+
+/* Install prompt */
+#install-prompt {
+    bottom: calc(env(safe-area-inset-bottom) + 1rem);
+    box-shadow: 0 -5px 30px rgba(0,0,0,0.15);
 }
 
 @keyframes scan {
