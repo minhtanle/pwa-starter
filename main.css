@@ -14,10 +14,34 @@
 
 /* Toàn bộ app chiếm đúng viewport, không scroll ngoài */
 html, body {
-  height: 100%;
-  overflow: hidden;
-  overscroll-behavior: none;
-  -webkit-tap-highlight-color: transparent;
+  height: 100% !important;
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Wrapper bọc toàn bộ — tính đúng safe area */
+#app {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100dvh !important;
+  padding-top: var(--sat) !important;
+  padding-right: var(--sar) !important;
+  padding-bottom: var(--sab) !important;
+  padding-left: var(--sal) !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+}
+
+/* Content: phần còn lại, scroll bên trong */
+#app-content {
+  flex: 1 !important;
+  min-height: 0 !important;
+  position: relative !important;
+  overflow: hidden !important;
 }
 
 /* Wrapper bọc toàn bộ — tính đúng safe area */
@@ -75,7 +99,13 @@ html, body {
 
 /* Content: phần còn lại, scroll bên trong */
 #app-content {
-  flex: 1;
+  flex:1;
+  min-height: 0;
+  position: relative;
+}
+
+#app-content > div {
+  height: 100%;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
@@ -133,14 +163,51 @@ html, body {
     box-shadow: 0 10px 20px -5px rgba(161, 27, 75, 0.4);
 }
 
+/* App view - full height when shown */
+#app-view {
+    display: none;
+    height: 100%;
+}
+
+#app-view:not(.hidden) {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Camera section in app-view */
+#app-view #camera-section {
+    flex: 1;
+    position: relative;
+    min-height: 0;
+}
+
+/* Info section in app-view */
+#app-view #info-section {
+    flex-shrink: 0;
+    background: white;
+    border-top: 1px solid #e5e7eb;
+    border-top-left-radius: 2.5rem;
+    border-top-right-radius: 2.5rem;
+    box-shadow: 0 -15px 30px rgba(0,0,0,0.4);
+    padding: 1rem;
+    padding-bottom: calc(env(safe-area-inset-bottom) + 1rem);
+    display: flex;
+    flex-direction: column;
+    height: var(--info-height);
+}
+
 /* Home screen grid */
 #home-screen {
     padding-top: 2rem;
+    height: 100%;
+    overflow-y: auto;
 }
 
 /* Settings page */
 #settings-page {
     padding-bottom: calc(env(safe-area-inset-bottom) + 2rem);
+    height: 100%;
+    overflow-y: auto;
 }
 
 .setting-item {

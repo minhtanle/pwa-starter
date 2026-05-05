@@ -1,5 +1,42 @@
 /* app.v1.0.0.js */
 
+// Bảo vệ layout khỏi bị thay đổi
+function protectLayout() {
+  const protectedElements = [document.body, document.getElementById('app'), document.getElementById('app-content')];
+
+  protectedElements.forEach(el => {
+    if (!el) return;
+
+    // Chặn thay đổi trực tiếp qua style
+    Object.defineProperty(el, 'style', {
+      get() {
+        return el._style || (el._style = {});
+      },
+      set() {
+        console.warn('Không thể thay đổi style của', el.id || el.tagName);
+      },
+      configurable: false
+    });
+
+    // MutationObserver để phát hiện và revert thay đổi
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach(mutation => {
+        if (mutation.type === 'attributes') {
+          if (mutation.attributeName === 'style') {
+            console.warn('Phát hiện thay đổi style của', el.id || el.tagName);
+            // Revert - nhưng cẩn thận không gây loop
+          }
+          if (mutation.attributeName === 'class') {
+            console.warn('Phát hiện thay đổi class của', el.id || el.tagName);
+          }
+        }
+      });
+    });
+
+    observer.observe(el, { attributes: true });
+  });
+}
+
 // Danh sách ứng dụng
 const apps = [
   { id: 'scanner', name: 'Scanner', icon: '📷', color: 'bg-emerald-500' },
@@ -63,7 +100,7 @@ function navigateTo(page, title = 'Home') {
 function loadApp(appId) {
   if (appId === 'scanner') {
     appView.innerHTML = `
-      <div id="camera-section" class="bg-slate-900 h-full relative">
+      <div id="camera-section" class="bg-slate-900">
         <div class="absolute inset-0 flex items-center justify-center pb-20">
           <div class="relative w-60 h-60">
             <div class="absolute -top-1 -left-1 w-12 h-12 border-t-4 border-l-4 border-emerald-500 rounded-tl-3xl"></div>
@@ -74,19 +111,32 @@ function loadApp(appId) {
           </div>
         </div>
       </div>
-      <div id="info-section" class="fixed bottom-0 w-full bg-white border-t border-gray-200 rounded-t-3xl p-4 pb-8">
-        <div class="flex items-center gap-4 mb-4">
-          <div class="flex-grow">
-            <h2 class="text-xl font-bold">QUÝ ĐỨC</h2>
-            <div class="flex items-center gap-2 mt-1">
-              <span class="text-xs text-gray-400">Mã: 11001</span>
-              <span class="text-xs text-emerald-600 font-bold">Thành công</span>
+      <div id="info-section">
+        <div class="p-3">
+          <div class="flex items-center gap-5 mb-4">
+            <div class="flex-grow">
+              <h2 class="text-2xl font-extrabold text-gray-900 leading-tight">QUÝ ĐỨC</h2>
+              <div class="flex items-center gap-2 mt-1">
+                <span class="text-xs font-bold text-gray-400 uppercase">Mã: 11001</span>
+                <span class="w-1 h-1 bg-gray-300 rounded-full"></span>
+                <span class="text-xs font-bold text-emerald-600 uppercase">Thành công</span>
+              </div>
+            </div>
+          </div>
+          <div class="space-y-2 mb-4">
+            <div class="flex justify-between items-center text-sm">
+              <span class="text-gray-400 font-medium">Phụ huynh:</span>
+              <span class="text-gray-800 font-bold">Nguyễn Đăng Thu Hà</span>
+            </div>
+            <div class="flex justify-between items-center text-sm">
+              <span class="text-gray-400 font-medium">Thời gian ra:</span>
+              <span class="text-emerald-600 font-black text-lg">14:21:38</span>
             </div>
           </div>
         </div>
-        <div class="flex gap-3">
-          <button class="flex-1 py-3 bg-gray-100 text-gray-500 font-bold rounded-2xl text-xs">STOP</button>
-          <button class="flex-[2.5] py-3 bg-[#A11B4B] text-white font-black rounded-2xl text-xs uppercase">Quét tiếp</button>
+        <div class="flex gap-3 px-3 pb-3 mt-auto">
+          <button class="flex-1 py-4 bg-gray-100 text-gray-500 font-bold rounded-2xl text-xs tracking-widest active:scale-95 transition-transform">STOP</button>
+          <button class="flex-[2.5] py-4 bg-[#A11B4B] text-white font-black rounded-2xl text-xs tracking-[0.15em] uppercase btn-shadow active:scale-95 transition-all">QUÉT TIẾP</button>
         </div>
       </div>
     `;
@@ -187,18 +237,13 @@ function setupEventListeners() {
 
   // Debug Edura
   document.getElementById('btn-debug-edura')?.addEventListener('click', () => {
-    navigateTo('edura', 'Edura Debug');
-  });
-
-  // Install PWA button in settings
-  document.getElementById('btn-install-pwa')?.addEventListener('click', () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-    } else {
-      alert('Ứng dụng đã được cài đặt hoặc trình duyệt không hỗ trợ');
+    if (window.eruda) {
+      eruda.show();
     }
   });
+
 }
 
 // Khởi chạy
+protectLayout();
 init();

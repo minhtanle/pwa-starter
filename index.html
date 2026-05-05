@@ -94,14 +94,7 @@
                         </button>
                     </div>
 
-                    <!-- Tải PWA -->
-                    <div class="setting-item bg-gray-50 p-4 rounded-2xl">
-                        <h3 class="font-bold text-gray-800 mb-2">Tải PWA</h3>
-                        <p class="text-sm text-gray-500 mb-3">Cài đặt ứng dụng lên thiết bị</p>
-                        <button id="btn-install-pwa" class="w-full py-3 bg-[#A11B4B] text-white font-bold rounded-xl text-sm active:scale-95 transition-transform">
-                            Cài đặt ngay
-                        </button>
-                    </div>
+
                 </div>
             </div>
         </main>
@@ -115,16 +108,9 @@
     </div>
 
     <!-- JS -->
+    <script src="//cdn.jsdelivr.net/npm/eruda"></script>
+    <script>eruda.init();</script>
     <script src="./app.js"></script>
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('SW registered:', reg))
-                    .catch(err => console.log('SW registration failed:', err))
-            })
-        }
-    </script>
 </body>
 
 </html>
