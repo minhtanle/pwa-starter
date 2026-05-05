@@ -1,4 +1,4 @@
-/* app.v1.0.0.js */
+/* app.js - Main application logic */
 
 // Bảo vệ layout khỏi bị thay đổi
 function protectLayout() {
@@ -7,27 +7,11 @@ function protectLayout() {
   protectedElements.forEach(el => {
     if (!el) return;
 
-    // Chặn thay đổi trực tiếp qua style
-    Object.defineProperty(el, 'style', {
-      get() {
-        return el._style || (el._style = {});
-      },
-      set() {
-        console.warn('Không thể thay đổi style của', el.id || el.tagName);
-      },
-      configurable: false
-    });
-
-    // MutationObserver để phát hiện và revert thay đổi
     const observer = new MutationObserver((mutations) => {
       mutations.forEach(mutation => {
         if (mutation.type === 'attributes') {
-          if (mutation.attributeName === 'style') {
-            console.warn('Phát hiện thay đổi style của', el.id || el.tagName);
-            // Revert - nhưng cẩn thận không gây loop
-          }
-          if (mutation.attributeName === 'class') {
-            console.warn('Phát hiện thay đổi class của', el.id || el.tagName);
+          if (mutation.attributeName === 'style' || mutation.attributeName === 'class') {
+            console.warn('Phát hiện thay đổi', mutation.attributeName, 'của', el.id || el.tagName);
           }
         }
       });
@@ -39,10 +23,26 @@ function protectLayout() {
 
 // Danh sách ứng dụng
 const apps = [
-  { id: 'scanner', name: 'Scanner', icon: '📷', color: 'bg-emerald-500' },
-  { id: 'edura', name: 'Edura', icon: '🎓', color: 'bg-blue-500' },
+  { id: 'scanner', name: 'Scanner', icon: '📷', color: 'bg-emerald-500', component: 'app-scanner' },
+  { id: 'edura', name: 'Edura', icon: '🎓', color: 'bg-blue-500', component: 'app-edura' },
   { id: 'settings', name: 'Settings', icon: '⚙️', color: 'bg-gray-500' }
 ];
+
+// Lazy load component registry
+const componentMap = {
+  'app-scanner': async () => {
+    const module = await import('./components/scanner.js');
+    if (!customElements.get('app-scanner')) {
+      customElements.define('app-scanner', module.default);
+    }
+  },
+  'app-edura': async () => {
+    const module = await import('./components/edura.js');
+    if (!customElements.get('app-edura')) {
+      customElements.define('app-edura', module.default);
+    }
+  }
+};
 
 // DOM elements
 const homeScreen = document.getElementById('home-screen');
@@ -61,6 +61,7 @@ function init() {
   setupEventListeners();
   registerServiceWorker();
   setupInstallPrompt();
+  loadErudaSetting();
 }
 
 // Hiển thị grid ứng dụng
@@ -76,80 +77,55 @@ function renderAppGrid() {
   `).join('');
 }
 
-// Chuyển trang
+// Chuyển trang với hiệu ứng fade
 function navigateTo(page, title = 'Home') {
-  homeScreen.classList.add('hidden');
-  appView.classList.add('hidden');
-  settingsPage.classList.add('hidden');
-  btnBack.classList.remove('hidden');
+  const currentPage = homeScreen.classList.contains('hidden') ? (appView.classList.contains('hidden') ? 'settings' : 'app') : 'home';
 
-  if (page === 'home') {
-    homeScreen.classList.remove('hidden');
-    btnBack.classList.add('hidden');
-  } else if (page === 'settings') {
-    settingsPage.classList.remove('hidden');
-  } else {
-    appView.classList.remove('hidden');
-    loadApp(page);
-  }
+  const activePage = currentPage === 'home' ? homeScreen : (currentPage === 'settings' ? settingsPage : appView);
+  activePage.classList.add('opacity-0', 'transition-opacity', 'duration-200');
 
-  headerTitle.textContent = title;
+  setTimeout(() => {
+    homeScreen.classList.add('hidden');
+    appView.classList.add('hidden');
+    settingsPage.classList.add('hidden');
+    btnBack.classList.remove('hidden');
+
+    if (page === 'home') {
+      homeScreen.classList.remove('hidden');
+      btnBack.classList.add('hidden');
+    } else if (page === 'settings') {
+      settingsPage.classList.remove('hidden');
+    } else {
+      appView.classList.remove('hidden');
+      loadApp(page);
+    }
+
+    headerTitle.textContent = title;
+
+    setTimeout(() => {
+      const newPage = page === 'home' ? homeScreen : (page === 'settings' ? settingsPage : appView);
+      newPage.classList.remove('opacity-0');
+    }, 50);
+  }, 200);
 }
 
-// Load nội dung ứng dụng
-function loadApp(appId) {
-  if (appId === 'scanner') {
-    appView.innerHTML = `
-      <div id="camera-section" class="bg-slate-900">
-        <div class="absolute inset-0 flex items-center justify-center pb-20">
-          <div class="relative w-60 h-60">
-            <div class="absolute -top-1 -left-1 w-12 h-12 border-t-4 border-l-4 border-emerald-500 rounded-tl-3xl"></div>
-            <div class="absolute -top-1 -right-1 w-12 h-12 border-t-4 border-r-4 border-emerald-500 rounded-tr-3xl"></div>
-            <div class="absolute -bottom-1 -left-1 w-12 h-12 border-b-4 border-l-4 border-emerald-500 rounded-bl-3xl"></div>
-            <div class="absolute -bottom-1 -right-1 w-12 h-12 border-b-4 border-r-4 border-emerald-500 rounded-br-3xl"></div>
-            <div class="scan-anim absolute top-2 left-4 right-4 h-1 bg-emerald-400 shadow-[0_0_20px_#10b981]"></div>
-          </div>
-        </div>
-      </div>
-      <div id="info-section">
-        <div class="p-3">
-          <div class="flex items-center gap-5 mb-4">
-            <div class="flex-grow">
-              <h2 class="text-2xl font-extrabold text-gray-900 leading-tight">QUÝ ĐỨC</h2>
-              <div class="flex items-center gap-2 mt-1">
-                <span class="text-xs font-bold text-gray-400 uppercase">Mã: 11001</span>
-                <span class="w-1 h-1 bg-gray-300 rounded-full"></span>
-                <span class="text-xs font-bold text-emerald-600 uppercase">Thành công</span>
-              </div>
-            </div>
-          </div>
-          <div class="space-y-2 mb-4">
-            <div class="flex justify-between items-center text-sm">
-              <span class="text-gray-400 font-medium">Phụ huynh:</span>
-              <span class="text-gray-800 font-bold">Nguyễn Đăng Thu Hà</span>
-            </div>
-            <div class="flex justify-between items-center text-sm">
-              <span class="text-gray-400 font-medium">Thời gian ra:</span>
-              <span class="text-emerald-600 font-black text-lg">14:21:38</span>
-            </div>
-          </div>
-        </div>
-        <div class="flex gap-3 px-3 pb-3 mt-auto">
-          <button class="flex-1 py-4 bg-gray-100 text-gray-500 font-bold rounded-2xl text-xs tracking-widest active:scale-95 transition-transform">STOP</button>
-          <button class="flex-[2.5] py-4 bg-[#A11B4B] text-white font-black rounded-2xl text-xs tracking-[0.15em] uppercase btn-shadow active:scale-95 transition-all">QUÉT TIẾP</button>
-        </div>
-      </div>
-    `;
-  } else if (appId === 'edura') {
-    appView.innerHTML = `
-      <div class="p-6">
-        <h2 class="text-2xl font-bold mb-4">Edura Debug</h2>
-        <div class="bg-gray-50 p-4 rounded-2xl">
-          <p class="text-sm text-gray-600">Debug tools cho hệ thống Edura</p>
-        </div>
-      </div>
-    `;
+// Load Web Component
+async function loadApp(appId) {
+  const app = apps.find(a => a.id === appId);
+  if (!app?.component) return;
+
+  appView.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+  appView.innerHTML = '';
+
+  // Lazy load component
+  if (componentMap[app.component]) {
+    await componentMap[app.component]();
   }
+
+  setTimeout(() => {
+    appView.innerHTML = `<${app.component}></${app.component}>`;
+    appView.classList.remove('opacity-0');
+  }, 150);
 }
 
 // Đăng ký Service Worker
@@ -178,7 +154,7 @@ function setupInstallPrompt() {
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
-    document.getElementById('install-prompt').classList.remove('hidden');
+    document.getElementById('install-prompt')?.classList.remove('hidden');
   });
 
   document.getElementById('install-btn')?.addEventListener('click', async () => {
@@ -187,18 +163,51 @@ function setupInstallPrompt() {
       const { outcome } = await deferredPrompt.userChoice;
       console.log(`Kết quả: ${outcome}`);
       deferredPrompt = null;
-      document.getElementById('install-prompt').classList.add('hidden');
+      document.getElementById('install-prompt')?.classList.add('hidden');
     }
   });
 
   document.getElementById('close-install')?.addEventListener('click', () => {
-    document.getElementById('install-prompt').classList.add('hidden');
+    document.getElementById('install-prompt')?.classList.add('hidden');
     deferredPrompt = null;
   });
 
   window.addEventListener('appinstalled', () => {
     console.log('Đã cài đặt PWA');
-    document.getElementById('install-prompt').classList.add('hidden');
+    document.getElementById('install-prompt')?.classList.add('hidden');
+  });
+}
+
+// Toggle eruda based on setting
+function loadErudaSetting() {
+  const toggle = document.getElementById('toggle-eruda');
+  if (!toggle) return;
+
+  const saved = localStorage.getItem('eruda-enabled') === 'true';
+  toggle.checked = saved;
+
+  if (saved) {
+    const script = document.createElement('script');
+    script.src = '//cdn.jsdelivr.net/npm/eruda';
+    script.onload = () => eruda.init();
+    document.head.appendChild(script);
+  }
+
+  toggle.addEventListener('change', () => {
+    if (toggle.checked) {
+      if (window.eruda) {
+        eruda.init();
+      } else {
+        const script = document.createElement('script');
+        script.src = '//cdn.jsdelivr.net/npm/eruda';
+        script.onload = () => eruda.init();
+        document.head.appendChild(script);
+      }
+      localStorage.setItem('eruda-enabled', 'true');
+    } else {
+      if (window.eruda) eruda.destroy();
+      localStorage.setItem('eruda-enabled', 'false');
+    }
   });
 }
 
@@ -230,18 +239,8 @@ function setupEventListeners() {
 
   // Debug CSS
   document.getElementById('btn-debug-css')?.addEventListener('click', () => {
-    console.log('Debug CSS mode enabled');
     document.body.classList.toggle('debug-css');
-    alert('Debug CSS: Toggle CSS visualization');
   });
-
-  // Debug Edura
-  document.getElementById('btn-debug-edura')?.addEventListener('click', () => {
-    if (window.eruda) {
-      eruda.show();
-    }
-  });
-
 }
 
 // Khởi chạy
